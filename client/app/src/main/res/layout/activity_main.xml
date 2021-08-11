@@ -27,5 +27,4 @@
         android:text="@string/keyboard"
         android:textAlignment="center"
         app:srcCompat="@android:drawable/stat_notify_chat" />
-
 </RelativeLayout>

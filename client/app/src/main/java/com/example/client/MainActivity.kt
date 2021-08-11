@@ -1,5 +1,6 @@
 package com.example.client
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.KeyEvent.*
@@ -13,10 +14,11 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), Callback {
 
-    private lateinit var layout: View;
-    private lateinit var extFloatingButton: ExtendedFloatingActionButton;
+    private lateinit var layout: View
+    private lateinit var extFloatingButton: ExtendedFloatingActionButton
     private lateinit var imm: InputMethodManager
 
+    @SuppressLint("ClickableViewAccessibility") // we're not dealing with swipes.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity(), Callback {
         extFloatingButton.setOnClickListener { showSoftKeyboard() }
 
         layout.setOnTouchListener { _, event ->
-            println(event)
+            hideSoftKeyboard()
             return@setOnTouchListener true
         }
     }
@@ -38,7 +40,7 @@ class MainActivity : AppCompatActivity(), Callback {
     }
 
     private fun hideSoftKeyboard() {
-        imm.hideSoftInputFromWindow(this.currentFocus?.windowToken, 0)
+        imm.hideSoftInputFromWindow( extFloatingButton.applicationWindowToken, 0)
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
@@ -46,14 +48,8 @@ class MainActivity : AppCompatActivity(), Callback {
             println("shifted")
         }
         return when (keyCode) {
-            KEYCODE_ENTER -> {
-                hideSoftKeyboard()
-                true
-            }
             KEYCODE_SHIFT_LEFT -> { true }
             else -> {
-                println(event)
-                println(keyCode)
                 super.onKeyUp(keyCode, event)
             }
         }
