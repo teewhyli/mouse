@@ -2,10 +2,12 @@ package com.example.client
 
 import android.annotation.SuppressLint
 import android.os.*
+import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.*
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.*
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -18,10 +20,11 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class MainActivity : AppCompatActivity(), Callback {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var layout: View
     private lateinit var extFloatingButton: ExtendedFloatingActionButton
+    private lateinit var keyboardEditText: EditText
     private lateinit var imm: InputMethodManager
     private var mBackgroundHandlerThread: HandlerThread = HandlerThread("Message Handler Thread")
     private val es: ExecutorService = Executors.newCachedThreadPool()
@@ -31,6 +34,7 @@ class MainActivity : AppCompatActivity(), Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 
         mBackgroundHandlerThread.start()
 
@@ -53,40 +57,51 @@ class MainActivity : AppCompatActivity(), Callback {
 
         layout = findViewById(R.id.touch_board)
         extFloatingButton = findViewById(R.id.extended_fab)
-        imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        keyboardEditText = findViewById(R.id.keyboard)
+        keyboardEditText.inputType = 0
 
-        extFloatingButton.setOnClickListener { showSoftKeyboard() }
 
-        layout.setOnTouchListener { _, _ ->
+        extFloatingButton.setOnClickListener {
+            keyboardEditText.requestFocus()
+            showSoftKeyboard(keyboardEditText)
+        }
+
+        keyboardEditText.setOnKeyListener { v, keyCode, event ->
+            Log.d("KeyboardEditText", "event: $event")
+
+            if (event.action == ACTION_UP) {
+                when (keyCode) {
+                    KEYCODE_SHIFT_LEFT -> {
+                        true
+                    }
+                    else -> {
+                        val msg = Message.obtain(mBackgroundHandler)
+                        val instructions = Instructions()
+                        instructions.operationKind = Instructions.CommandType.OP_TYPING
+                        instructions.inputStr = keyCode.toString()
+                        msg.obj = processCommand(instructions)
+                        msg.sendToTarget()
+                        super.onKeyUp(keyCode, event)
+                    }
+                }
+            }
+
+            true
+        }
+
+        layout.setOnTouchListener { v, ev ->
             hideSoftKeyboard()
+            Log.i("OnTouch", "$ev")
             return@setOnTouchListener true
         }
     }
 
-    private fun showSoftKeyboard() {
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0)
+    private fun showSoftKeyboard(editText: EditText) {
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
 
     private fun hideSoftKeyboard() {
         imm.hideSoftInputFromWindow( extFloatingButton.applicationWindowToken, 0)
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        if (event.isShiftPressed){
-            println("shifted")
-        }
-        return when (keyCode) {
-            KEYCODE_SHIFT_LEFT -> { true }
-            else -> {
-                val msg = Message.obtain(mBackgroundHandler)
-                val instructions = Instructions()
-                instructions.operationKind = Instructions.CommandType.OP_TYPING
-                instructions.inputStr = keyCode.toString()
-                msg.obj = processCommand(instructions)
-                msg.sendToTarget()
-                super.onKeyUp(keyCode, event)
-            }
-        }
     }
 
     override fun onDestroy() {
