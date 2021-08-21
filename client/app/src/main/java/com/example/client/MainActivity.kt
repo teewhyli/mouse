@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 actionType = Instructions.ActionType.fromInt(event.action),
                 inputStr = getCharacterDisplayLabel(event)
             )
-            msg.obj = processCommand(instructions)q
+            msg.obj = processCommand(instructions)
             msg.sendToTarget()
             super.onKeyUp(keyCode, event)
 
