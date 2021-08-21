@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
             Log.d("handler", msg)
 
-            writeToServer.print(msg)
+            writeToServer.println(msg)
             writeToServer.flush()
             true
         }
@@ -118,8 +118,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCharacterDisplayLabel(event: KeyEvent): String{
         return when(event.keyCode){
-            KEYCODE_SPACE -> event.keyCode.toString()
-            KEYCODE_SHIFT_LEFT -> event.keyCode.toString()
+            KEYCODE_SPACE -> "SPACE"
+            KEYCODE_SHIFT_LEFT -> "LSHIFT"
+            KEYCODE_DEL -> "DEL"
+            KEYCODE_APOSTROPHE -> "APOS"
             else -> event.keyCharacterMap.getDisplayLabel(event.keyCode).toString()
         }
     }
