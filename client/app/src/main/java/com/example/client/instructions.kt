@@ -1,16 +1,28 @@
 package com.example.client
 
-class Instructions {
+class Instructions(
+    private val moveX: Int = -1,
+    private val moveY: Int = -1,
+    private val actionType: ActionType? = null,
+    private val operationKind: CommandType? = null,
+    private val inputStr: String? = null) {
 
     enum class CommandType {
-        OP_MOVE, OP_CLICK_DOWN, OP_CLICK_UP, OP_RIGHT_CLICK, OP_DEL_TEXT, OP_TYPING
+        OP_MOVE, OP_CLICK_DOWN, OP_CLICK_UP, OP_RIGHT_CLICK, OP_TYPING
     }
 
-    // only valid when operationKind is OPERATION_MOVE
-    var moveX = -1
-    var moveY = -1
-    var operationKind: CommandType? = null
-    var inputStr: String? = null
+    enum class ActionType(val value: Int) {
+        ACTION_DOWN(0),
+        ACTION_UP(1),
+        ACTION_MOVE(2),
+        ACTION_POINTER_DOWN(5),
+        ACTION_POINTER_UP(6);
+
+        companion object {
+            private val map = ActionType.values().associateBy(ActionType::value)
+            fun fromInt(type: Int) = map[type]
+        }
+    }
 
     override fun toString(): String {
         val commands: String = when (operationKind) {
@@ -21,6 +33,6 @@ class Instructions {
             CommandType.OP_TYPING -> "typing"
             else -> "wrong operation"
         }
-        return "OperationData [operationKind=$commands, moveX=$moveX, moveY=$moveY, inputStr=$inputStr]"
+        return "OperationData [operationKind=$commands, actionType=$actionType, moveX=$moveX, moveY=$moveY, inputStr=$inputStr]";
     }
 }

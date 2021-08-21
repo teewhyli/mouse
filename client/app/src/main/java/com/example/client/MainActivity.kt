@@ -63,30 +63,23 @@ class MainActivity : AppCompatActivity() {
             showSoftKeyboard(keyboardEditText)
         }
 
-        keyboardEditText.setOnKeyListener { v, keyCode, event ->
+        keyboardEditText.setOnKeyListener { _ , keyCode, event ->
             Log.d("KeyboardEditText", "event: $event")
 
-            if (event.action == ACTION_UP) {
-                when (keyCode) {
-                    KEYCODE_SHIFT_LEFT -> {
-                        true
-                    }
-                    else -> {
-                        val msg = Message.obtain(mBackgroundHandler)
-                        val instructions = Instructions()
-                        instructions.operationKind = Instructions.CommandType.OP_TYPING
-                        instructions.inputStr = keyCode.toString()
-                        msg.obj = processCommand(instructions)
-                        msg.sendToTarget()
-                        super.onKeyUp(keyCode, event)
-                    }
-                }
-            }
+            val msg = Message.obtain(mBackgroundHandler)
+            val instructions = Instructions(
+                operationKind = Instructions.CommandType.OP_TYPING,
+                actionType = Instructions.ActionType.fromInt(event.action),
+                inputStr = getCharacterDisplayLabel(event)
+            )
+            msg.obj = processCommand(instructions)q
+            msg.sendToTarget()
+            super.onKeyUp(keyCode, event)
 
             true
         }
 
-        layout.setOnTouchListener { v, ev ->
+        layout.setOnTouchListener { _, ev ->
             hideSoftKeyboard()
             Log.i("OnTouch", "$ev")
             return@setOnTouchListener true
@@ -123,4 +116,11 @@ class MainActivity : AppCompatActivity() {
         writeToServer = PrintWriter(OutputStreamWriter(sock.getOutputStream(), StandardCharsets.US_ASCII))
     }
 
+    private fun getCharacterDisplayLabel(event: KeyEvent): String{
+        return when(event.keyCode){
+            KEYCODE_SPACE -> event.keyCode.toString()
+            KEYCODE_SHIFT_LEFT -> event.keyCode.toString()
+            else -> event.keyCharacterMap.getDisplayLabel(event.keyCode).toString()
+        }
+    }
 }
