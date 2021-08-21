@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var extFloatingButton: ExtendedFloatingActionButton
     private lateinit var keyboardEditText: EditText
     private lateinit var imm: InputMethodManager
+    private lateinit var sock: Socket
+    private lateinit var writeToServer: PrintWriter
     private var mBackgroundHandlerThread: HandlerThread = HandlerThread("Message Handler Thread")
     private val es: ExecutorService = Executors.newCachedThreadPool()
     private lateinit var mBackgroundHandler: Handler
@@ -36,22 +38,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 
+        es.submit{ connect() }
+
         mBackgroundHandlerThread.start()
 
         mBackgroundHandler = Handler(mBackgroundHandlerThread.looper){
             val msg: String = it.obj.toString()
-            es.submit{
-                val socket = Socket("192.168.1.80", 5555)
-                socket.use { sock ->
-                    val writeToServer =
-                        PrintWriter(OutputStreamWriter(sock.getOutputStream(), StandardCharsets.UTF_8))
 
-                    writeToServer.use { write ->
-                        write.print(msg)
-                        write.flush()
-                    }
-                }
-            }
+            Log.d("handler", msg)
+
+            writeToServer.print(msg)
+            writeToServer.flush()
             true
         }
 
@@ -119,4 +116,11 @@ class MainActivity : AppCompatActivity() {
         val gson = Gson()
         return gson.toJson(instructions, instructions::class.java)
     }
+
+    private fun connect(){
+        sock = Socket("192.168.1.80", 5555)
+        sock.keepAlive = true
+        writeToServer = PrintWriter(OutputStreamWriter(sock.getOutputStream(), StandardCharsets.US_ASCII))
+    }
+
 }

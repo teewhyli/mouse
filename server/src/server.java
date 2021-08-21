@@ -1,21 +1,32 @@
-import java.net.*;
-import java.util.concurrent.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
-import java.io.*;
 
 public class server {
+
+    KeyEventMapping s = new KeyEventMapping();
+    private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public void start(int port) {
         ExecutorService es = Executors.newCachedThreadPool();
         try (final ServerSocket serverSocket = new ServerSocket(port)) {
             while(true) {
                 // perhaps return a Future here to check if server should shutdown?
-                Future<OnConnectionChangeListener> f = es.submit(new Controller(serverSocket.accept(), new Instructions()));
-                OnConnectionChangeListener result = f.get();
-                result.disconnected(es);
-                break;
+                es.submit(new Controller(serverSocket.accept(), new ControlUtility()));
+//                OnConnectionChangeListener result = f.get();
+//                result.disconnected(es);
             }
-        } catch (IOException | ExecutionException | InterruptedException e) {
+        } catch (IOException | AWTException e) {
             e.printStackTrace();
         }
     }
@@ -45,21 +56,20 @@ public class server {
 
         @Override
         public OnConnectionChangeListener call() {
+            System.out.println("connected!");
             try (final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                StringBuilder sb = new StringBuilder();
-                while(true) {
-                    char[] buf = new char[1024 * 2]; // 2MB
-                    int len = in.read(buf, 0, buf.length);
+                char[] buf = new char[1024 * 2]; // 2MB
+                int len;
+                while((len = in.read(buf, 0, buf.length)) != -1 ) {
                     sb.append(new String(buf, 0, len));
-                    String instruct = this.instructions.processCommand(sb);
-                    if (instruct != null && instruct.equals("stop")){
-                        break;
-                    }
-                    System.out.println(instruct);
+                    System.out.println(sb);
+                    instructionController.processInstructions(processCommand(sb));
                     sb.setLength(0);
                 }
             } catch (IOException e) {
                 Logger.getLogger(e.getMessage());
+            } catch (Exception e) { // need to change to a less generic exception like parsing...
+                e.printStackTrace();
             }
             return new TEST();
         }
@@ -70,4 +80,12 @@ public class server {
         server.start(5555);
     }
 
+    public Instructions processCommand(StringBuilder inputLine) throws Exception {
+        String input = inputLine.toString();
+        Instructions result = GSON.fromJson(input, Instructions.class);
+        if (result.getInputStr() == null || result.getInputStr().equals("")) {
+            throw new Exception("");
+        }
+        return result;
+    }
 }
