@@ -1,51 +1,37 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+public class Instructions{
 
-public class Instructions {
+    private int moveX = -1;
+    private int moveY = -1;
+    private InstructionType instructionType;
+    private ActionType actionType;
+    private String input;
 
-    private final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    public String processCommand(StringBuilder inputLine) {
-        String input = inputLine.toString();
-        Instructions result = GSON.fromJson(input, Instructions.class);
-        if (result.getInputStr() == null || result.getInputStr().equals("")) {
-            return null;
-        }
-        switch(result.getOperationKind()){
-            case OP_TYPING:
-                return result.getInputStr(); // command
-            default:
-                return null;
-        }
-    }
-
-    public enum CommandType {
+    public enum InstructionType {
         OP_MOVE,
         OP_CLICK_DOWN,
         OP_CLICK_UP,
         OP_RIGHT_CLICK,
-        OP_DEL_TEXT,
         OP_TYPING
         }
 
-    // only valid when operationKind is OPERATION_MOVE
-    private int moveX = -1;
-    private int moveY = -1;
-    private CommandType operationKind;
-    private String inputStr;
-
-    public CommandType getOperationKind() {
-        return operationKind;
+    public enum ActionType {
+        ACTION_UP, ACTION_DOWN, ACTION_MOVE, ACTION_POINTER_DOWN, ACTION_POINTER_UP
     }
 
-    public void setOperationKind(CommandType operationKind) {
-        this.operationKind = operationKind;
+    public InstructionType getOperationKind() {
+        return instructionType;
     }
+
+    public void setOperationKind(InstructionType operationKind) {
+        this.instructionType = operationKind;
+    }
+
+    public void setActionType(ActionType actionType) { this.actionType = actionType; }
+    public ActionType getActionType() { return this.actionType; }
 
     public int getMoveX() {
         return moveX;
     }
-
     public void setMoveX(int moveX) {
         this.moveX = moveX;
     }
@@ -53,23 +39,22 @@ public class Instructions {
     public int getMoveY() {
         return moveY;
     }
-
     public void setMoveY(int moveY) {
         this.moveY = moveY;
     }
 
-    public String getInputStr() {
-        return inputStr;
+    public String getInput() {
+        return input;
     }
 
-    public void setInputStr(String inputStr) {
-        this.inputStr = inputStr;
+    public void setInput(String input) {
+        this.input = input;
     }
 
     @Override
     public String toString() {
         String commands;
-        switch (operationKind) {
+        switch (instructionType) {
             case OP_CLICK_DOWN:
                 commands = "click down";
                 break;
@@ -89,6 +74,6 @@ public class Instructions {
                 commands = "wrong operation";
                 break;
         }
-        return "OperationData [operationKind=" + commands + ", moveX=" + moveX + ", moveY=" + moveY + ", inputStr=" + inputStr + "]";
+        return "OperationData [operationKind=" + commands + ", actionType=" + actionType + ", moveX=" + moveX + ", moveY=" + moveY + ", input=" + input + "]";
     }
 }

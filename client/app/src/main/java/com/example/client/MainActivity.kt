@@ -68,9 +68,9 @@ class MainActivity : AppCompatActivity() {
 
             val msg = Message.obtain(mBackgroundHandler)
             val instructions = Instructions(
-                operationKind = Instructions.CommandType.OP_TYPING,
+                instructionType = Instructions.InstructionType.OP_TYPING,
                 actionType = Instructions.ActionType.fromInt(event.action),
-                inputStr = getCharacterDisplayLabel(event)
+                input = getCharacterDisplayLabel(event)
             )
             msg.obj = processCommand(instructions)
             msg.sendToTarget()

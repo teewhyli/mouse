@@ -4,10 +4,10 @@ class Instructions(
     private val moveX: Int = -1,
     private val moveY: Int = -1,
     private val actionType: ActionType? = null,
-    private val operationKind: CommandType? = null,
-    private val inputStr: String? = null) {
+    private val instructionType: InstructionType? = null,
+    private val input: String? = null) {
 
-    enum class CommandType {
+    enum class InstructionType {
         OP_MOVE, OP_CLICK_DOWN, OP_CLICK_UP, OP_RIGHT_CLICK, OP_TYPING
     }
 
@@ -25,14 +25,14 @@ class Instructions(
     }
 
     override fun toString(): String {
-        val commands: String = when (operationKind) {
-            CommandType.OP_CLICK_DOWN -> "click down"
-            CommandType.OP_CLICK_UP -> "click up"
-            CommandType.OP_MOVE -> "move"
-            CommandType.OP_RIGHT_CLICK -> "right click"
-            CommandType.OP_TYPING -> "typing"
+        val commands: String = when (instructionType) {
+            InstructionType.OP_CLICK_DOWN -> "click down"
+            InstructionType.OP_CLICK_UP -> "click up"
+            InstructionType.OP_MOVE -> "move"
+            InstructionType.OP_RIGHT_CLICK -> "right click"
+            InstructionType.OP_TYPING -> "typing"
             else -> "wrong operation"
         }
-        return "OperationData [operationKind=$commands, actionType=$actionType, moveX=$moveX, moveY=$moveY, inputStr=$inputStr]";
+        return "InstructionData [instructionType=$commands, actionType=$actionType, moveX=$moveX, moveY=$moveY, input=$input]";
     }
 }
