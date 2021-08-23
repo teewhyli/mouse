@@ -66,7 +66,7 @@ public class server {
                 String line;
                 while((line = in.readLine()) != null ) {
                     sb.append(line);
-                    System.out.println(sb);
+//                    System.out.println(sb);
                     instructionController.processInstructions(processCommand(sb));
                     sb.setLength(0);
                 }

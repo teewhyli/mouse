@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun connect(){
-        sock = Socket("192.168.1.80", 5555)
+        sock = Socket("192.168.1.83", 80)
         sock.keepAlive = true
         writeToServer = PrintWriter(OutputStreamWriter(sock.getOutputStream(), StandardCharsets.US_ASCII))
     }

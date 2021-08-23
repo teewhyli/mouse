@@ -7,19 +7,32 @@ public class ControlUtility {
     public ControlUtility() throws AWTException { }
 
     public void processInstructions(Instructions instructions){
-        switch(instructions.getOperationKind()){
+        switch (instructions.getOperationKind()){
             case OP_TYPING:
                 processKeyboardEvent(instructions);
             case OP_MOVE:
+            case OP_CLICK_DOWN:
+            case OP_CLICK_UP:
+                processMouseEvent(instructions);
+                break;
         }
     }
 
-    private void processMouseEvent(Instructions instructions){}
+    private void processMouseEvent(Instructions instructions){
+        switch (instructions.getActionType()){
+            case ACTION_MOVE:
+                int cur_x = MouseInfo.getPointerInfo().getLocation().x;
+                int cur_y = MouseInfo.getPointerInfo().getLocation().y;
+                r.mouseMove(cur_x + instructions.getMoveX(), cur_y + instructions.getMoveY());
+                break;
+        }
+    }
+
     private void processKeyboardEvent(Instructions instructions){
         Character letter = instructions.getInput().toCharArray()[0];
         switch (instructions.getActionType()){
             case ACTION_UP:
-                if(KeyEventMapping.mapping.containsKey(letter)) {
+                if (KeyEventMapping.mapping.containsKey(letter)) {
                     System.out.println((KeyEventMapping.mapping.get(letter)));
                 }
                 break;

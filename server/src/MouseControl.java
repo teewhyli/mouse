@@ -16,5 +16,7 @@ public class MouseControl implements Control {
     }
 
     @Override
-    public void process(Instructions instructions) { }
+    public void process(Instructions instructions) {
+
+    }
 }
