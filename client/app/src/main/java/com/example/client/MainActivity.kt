@@ -5,6 +5,7 @@ import android.os.*
 import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.*
+import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +33,9 @@ class MainActivity : AppCompatActivity() {
     private var mBackgroundHandlerThread: HandlerThread = HandlerThread("Message Handler Thread")
     private val es: ExecutorService = Executors.newCachedThreadPool()
     private lateinit var mBackgroundHandler: Handler
+    private var isKeyboardOn: AtomicBoolean = AtomicBoolean(false)
+    private var touchX: Float = 0.0F
+    private var touchY: Float = 0.0F
 
     @SuppressLint("ClickableViewAccessibility") // we're not dealing with swipes.
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,19 +84,57 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        layout.setOnTouchListener { _, ev ->
-            hideSoftKeyboard()
-            Log.i("OnTouch", "$ev")
+        layout.setOnTouchListener { _, event ->
+            val msg = Message.obtain(mBackgroundHandler)
+
+            Log.i("OnTouch", "$event")
+
+            if (isKeyboardOn.get() && event.action == ACTION_UP){
+                hideSoftKeyboard()
+                return@setOnTouchListener true
+            }
+
+            if (event.action == ACTION_DOWN){
+                touchX = event.x
+                touchY = event.y
+            }
+
+            if (!isKeyboardOn.get()){
+
+                if (event.eventTime - event.downTime >= 600 || event.action == ACTION_MOVE) {
+
+                    val instructions = Instructions(
+                        moveX = touchX.toInt() - event.x.toInt(),
+                        moveY = touchY.toInt() - event.y.toInt(),
+                        instructionType = Instructions.InstructionType.OP_MOVE,
+                        actionType = Instructions.ActionType.fromInt(event.action))
+
+                    msg.obj = processCommand(instructions)
+
+                } else {
+
+                    val instructions = Instructions(
+                        instructionType = Instructions.InstructionType.OP_CLICK_DOWN,
+                        actionType = Instructions.ActionType.fromInt(event.action))
+
+                    msg.obj = processCommand(instructions)
+
+                }
+
+                msg.sendToTarget()
+            }
             return@setOnTouchListener true
         }
     }
 
     private fun showSoftKeyboard(editText: EditText) {
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+        isKeyboardOn.set(true)
     }
 
     private fun hideSoftKeyboard() {
         imm.hideSoftInputFromWindow( extFloatingButton.applicationWindowToken, 0)
+        isKeyboardOn.set(false)
     }
 
     override fun onDestroy() {

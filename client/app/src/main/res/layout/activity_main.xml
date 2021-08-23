@@ -39,10 +39,10 @@
         android:layout_marginStart="0dp"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="4dp"
-        android:ems="10"
         android:alpha="0"
+        android:ems="10"
         android:importantForAutofill="no"
-        android:inputType="textPersonName"
+        android:inputType="textNoSuggestions|textPassword"
         android:labelFor="@id/keyboard"
         android:minHeight="48dp"
         tools:ignore="SpeakableTextPresentCheck" />
