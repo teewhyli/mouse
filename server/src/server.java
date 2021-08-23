@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 public class server {
 
     KeyEventMapping s = new KeyEventMapping();
+    MouseControl p = new MouseControl();
+
     private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public void start(int port) {
@@ -45,23 +47,25 @@ public class server {
         }
     }
 
-    private static class Controller implements Callable<OnConnectionChangeListener> {
+    private class Controller implements Callable<OnConnectionChangeListener> {
         private final Socket clientSocket;
-        private final Instructions instructions;
+        private final ControlUtility instructionController;
+        StringBuilder sb = new StringBuilder();
 
-        public Controller(Socket socket, Instructions instructions) {
+        public Controller(
+                Socket socket,
+                ControlUtility instructionController) {
             this.clientSocket = socket;
-            this.instructions = instructions;
+            this.instructionController = instructionController;
         }
 
         @Override
         public OnConnectionChangeListener call() {
             System.out.println("connected!");
             try (final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                char[] buf = new char[1024 * 2]; // 2MB
-                int len;
-                while((len = in.read(buf, 0, buf.length)) != -1 ) {
-                    sb.append(new String(buf, 0, len));
+                String line;
+                while((line = in.readLine()) != null ) {
+                    sb.append(line);
                     System.out.println(sb);
                     instructionController.processInstructions(processCommand(sb));
                     sb.setLength(0);
@@ -80,12 +84,8 @@ public class server {
         server.start(5555);
     }
 
-    public Instructions processCommand(StringBuilder inputLine) throws Exception {
+    public Instructions processCommand(StringBuilder inputLine) {
         String input = inputLine.toString();
-        Instructions result = GSON.fromJson(input, Instructions.class);
-        if (result.getInputStr() == null || result.getInputStr().equals("")) {
-            throw new Exception("");
-        }
-        return result;
+        return GSON.fromJson(input, Instructions.class);
     }
 }
