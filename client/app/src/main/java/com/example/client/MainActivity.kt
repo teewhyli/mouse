@@ -104,8 +104,8 @@ class MainActivity : AppCompatActivity() {
                 if (event.eventTime - event.downTime >= 600 || event.action == ACTION_MOVE) {
 
                     val instructions = Instructions(
-                        moveX = touchX.toInt() - event.x.toInt(),
-                        moveY = touchY.toInt() - event.y.toInt(),
+                        moveX = event.x.toInt() - touchX.toInt(),
+                        moveY = event.y.toInt() - touchY.toInt(),
                         instructionType = Instructions.InstructionType.OP_MOVE,
                         actionType = Instructions.ActionType.fromInt(event.action))
 
