@@ -3,26 +3,38 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KeyEventMapping {
-    public static final Map<Character, Integer> mapping = new HashMap<>();
+    private static final Map<String, Integer> mapping = new HashMap<>();
 
     static {
         for (int i = 'a', j = KeyEvent.VK_A; i<='z'; i++,j++) {
-            mapping.put((char)i, j);
+            mapping.put(Character.toString(i), j);
         }
 
-        mapping.put('0', KeyEvent.VK_SPACE);
-        mapping.put('1', KeyEvent.VK_SHIFT);
-        mapping.put('2', KeyEvent.VK_DELETE);
-        mapping.put('3', KeyEvent.VK_ENTER);
-        mapping.put('4', KeyEvent.VK_EQUALS);
-        mapping.put('5', KeyEvent.VK_QUOTE);
-        mapping.put('`', KeyEvent.VK_BACK_QUOTE);
-        mapping.put('-', KeyEvent.VK_MINUS);
-        mapping.put('/', KeyEvent.VK_SLASH);
-        mapping.put('\\', KeyEvent.VK_BACK_SLASH);
-        mapping.put('[', KeyEvent.VK_OPEN_BRACKET);
-        mapping.put(']', KeyEvent.VK_CLOSE_BRACKET);
-        mapping.put(',', KeyEvent.VK_COMMA);
-        mapping.put('.', KeyEvent.VK_PERIOD);
+        for (int i = '0', j = KeyEvent.VK_0; i<='9'; i++, j++){
+            mapping.put(Character.toString(i), j);
+        }
+
+        mapping.put("space", KeyEvent.VK_SPACE);
+        mapping.put("shift", KeyEvent.VK_SHIFT);
+        mapping.put("bspace", KeyEvent.VK_BACK_SPACE);
+        mapping.put("enter", KeyEvent.VK_ENTER);
+        mapping.put("equals", KeyEvent.VK_EQUALS);
+        mapping.put("quote", KeyEvent.VK_QUOTE);
+        mapping.put("`", KeyEvent.VK_BACK_QUOTE);
+        mapping.put("-", KeyEvent.VK_MINUS);
+        mapping.put("/", KeyEvent.VK_SLASH);
+        mapping.put("\\", KeyEvent.VK_BACK_SLASH);
+        mapping.put("[", KeyEvent.VK_OPEN_BRACKET);
+        mapping.put("]", KeyEvent.VK_CLOSE_BRACKET);
+        mapping.put(",", KeyEvent.VK_COMMA);
+        mapping.put(".", KeyEvent.VK_PERIOD);
+    }
+
+    public static int getKeyEvent(String input){
+        return mapping.get(input);
+    }
+
+    public static boolean containsKey(String input){
+        return mapping.containsKey(input);
     }
 }
