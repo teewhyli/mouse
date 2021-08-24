@@ -1,5 +1,6 @@
 import java.awt.*;
-import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.util.Locale;
 
 public class ControlUtility {
 
@@ -13,9 +14,9 @@ public class ControlUtility {
         switch (instructions.getOperationKind()){
             case OP_TYPING:
                 processKeyboardEvent(instructions);
+                break;
             case OP_MOVE:
-            case OP_CLICK_DOWN:
-            case OP_CLICK_UP:
+            case OP_LEFT_CLICK:
                 try {
                     processMouseEvent(instructions);
                 } catch (Exception e) {
@@ -32,11 +33,9 @@ public class ControlUtility {
                 int cur_y = MouseInfo.getPointerInfo().getLocation().y;
                 r.mouseMove(cur_x + instructions.getMoveX(), cur_y + instructions.getMoveY());
                 break;
-            case ACTION_DOWN:
-                r.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                break;
             case ACTION_UP:
-                r.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                r.mousePress(MouseEvent.BUTTON1_DOWN_MASK);
+                r.mouseRelease(MouseEvent.BUTTON1_DOWN_MASK);
                 break;
             default:
                 throw new Exception("Incorrect Action Type"); //TODO - make except more specific?
@@ -44,26 +43,21 @@ public class ControlUtility {
     }
 
     private void processKeyboardEvent(Instructions instructions){
-        Character letter = instructions.getInput().toCharArray()[0];
+        String letter = instructions.getInput().toLowerCase(Locale.ROOT);
+
+        System.out.println(letter);
+
+        if (!KeyEventMapping.containsKey(letter)){
+            return;
+        }
+
         switch (instructions.getActionType()){
             case ACTION_UP:
-                if (KeyEventMapping.mapping.containsKey(letter)) {
-                    System.out.println((KeyEventMapping.mapping.get(letter)));
-                }
+                r.keyRelease(KeyEventMapping.getKeyEvent(letter));
                 break;
             case ACTION_DOWN:
-//                if(KeyEventMapping.mapping.containsKey(letter)) {
-//                    System.out.println((KeyEventMapping.mapping.get(letter)));
-//                }
+                r.keyPress(KeyEventMapping.getKeyEvent(letter));
                 break;
-            case ACTION_MOVE:
-                break;
-            case ACTION_POINTER_DOWN:
-                break;
-            case ACTION_POINTER_UP:
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + instructions.getActionType());
         }
     }
 

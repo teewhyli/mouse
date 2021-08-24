@@ -14,9 +14,6 @@ import java.util.logging.Logger;
 
 public class server {
 
-    KeyEventMapping s = new KeyEventMapping();
-    MouseControl p = new MouseControl();
-
     private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public void start(int port) {
@@ -66,7 +63,6 @@ public class server {
                 String line;
                 while((line = in.readLine()) != null ) {
                     sb.append(line);
-//                    System.out.println(sb);
                     instructionController.processInstructions(processCommand(sb));
                     sb.setLength(0);
                 }

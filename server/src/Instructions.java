@@ -8,8 +8,7 @@ public class Instructions{
 
     public enum InstructionType {
         OP_MOVE,
-        OP_CLICK_DOWN,
-        OP_CLICK_UP,
+        OP_LEFT_CLICK,
         OP_RIGHT_CLICK,
         OP_TYPING
         }
@@ -55,11 +54,8 @@ public class Instructions{
     public String toString() {
         String commands;
         switch (instructionType) {
-            case OP_CLICK_DOWN:
-                commands = "click down";
-                break;
-            case OP_CLICK_UP:
-                commands = "click up";
+            case OP_LEFT_CLICK:
+                commands = "left click";
                 break;
             case OP_MOVE:
                 commands = "move";
