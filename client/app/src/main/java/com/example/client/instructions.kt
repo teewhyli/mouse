@@ -8,7 +8,7 @@ class Instructions(
     private val input: String? = null) {
 
     enum class InstructionType {
-        OP_MOVE, OP_CLICK_DOWN, OP_CLICK_UP, OP_RIGHT_CLICK, OP_TYPING
+        OP_MOVE, OP_LEFT_CLICK, OP_RIGHT_CLICK, OP_TYPING
     }
 
     enum class ActionType(val value: Int) {
@@ -26,8 +26,7 @@ class Instructions(
 
     override fun toString(): String {
         val commands: String = when (instructionType) {
-            InstructionType.OP_CLICK_DOWN -> "click down"
-            InstructionType.OP_CLICK_UP -> "click up"
+            InstructionType.OP_LEFT_CLICK -> "left click"
             InstructionType.OP_MOVE -> "move"
             InstructionType.OP_RIGHT_CLICK -> "right click"
             InstructionType.OP_TYPING -> "typing"

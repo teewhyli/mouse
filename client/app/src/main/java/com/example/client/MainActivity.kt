@@ -99,7 +99,11 @@ class MainActivity : AppCompatActivity() {
 //                return@setOnTouchListener true
             }
 
-            if (event.eventTime - lastLandMark > 80){
+            if (event.action == ACTION_DOWN){
+                return@setOnTouchListener true
+            }
+
+            if (event.eventTime - lastLandMark > 50){
                 touchX = event.x
                 touchY = event.y
                 lastLandMark = event.eventTime
@@ -107,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
             if (!isKeyboardOn.get()){
 
-                if (event.action == ACTION_MOVE || event.eventTime - event.downTime >= 500) {
+                if (event.action == ACTION_MOVE && event.eventTime - event.downTime >= 150) {
 
                     val instructions = Instructions(
                         moveX = (event.x.toInt() - touchX.toInt()) / 2,
@@ -117,17 +121,19 @@ class MainActivity : AppCompatActivity() {
 
                     msg.obj = processCommand(instructions)
 
-                } else {
+                    msg.sendToTarget()
+
+                } else if (event.eventTime - event.downTime < 150){
 
                     val instructions = Instructions(
-                        instructionType = Instructions.InstructionType.OP_CLICK_DOWN,
+                        instructionType = Instructions.InstructionType.OP_LEFT_CLICK,
                         actionType = Instructions.ActionType.fromInt(event.action))
 
                     msg.obj = processCommand(instructions)
 
-                }
+                    msg.sendToTarget()
 
-                msg.sendToTarget()
+                }
             }
             return@setOnTouchListener true
         }
@@ -167,12 +173,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCharacterDisplayLabel(event: KeyEvent): String{
         return when(event.keyCode){
-            KEYCODE_SPACE -> "0"
-            KEYCODE_SHIFT_LEFT -> "1"
-            KEYCODE_DEL -> "2"
-            KEYCODE_ENTER -> "3"
-            KEYCODE_EQUALS -> "4"
-            KEYCODE_APOSTROPHE -> "5"
+            KEYCODE_SPACE -> "space"
+            KEYCODE_SHIFT_LEFT -> "shift"
+            KEYCODE_DEL -> "bspace"
+            KEYCODE_ENTER -> "enter"
+            KEYCODE_EQUALS -> "equals"
+            KEYCODE_APOSTROPHE -> "quote"
             else -> event.keyCharacterMap.getDisplayLabel(event.keyCode).toString()
         }
     }
