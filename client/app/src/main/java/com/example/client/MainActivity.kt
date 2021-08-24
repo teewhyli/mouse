@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private var isKeyboardOn: AtomicBoolean = AtomicBoolean(false)
     private var touchX: Float = 0.0F
     private var touchY: Float = 0.0F
+    private var lastLandMark: Long = 0L
 
     @SuppressLint("ClickableViewAccessibility") // we're not dealing with swipes.
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +72,10 @@ class MainActivity : AppCompatActivity() {
         keyboardEditText.setOnKeyListener { _ , keyCode, event ->
             Log.d("KeyboardEditText", "event: $event")
 
+            if (keyCode == KEYCODE_UNKNOWN){
+                return@setOnKeyListener true
+            }
+
             val msg = Message.obtain(mBackgroundHandler)
             val instructions = Instructions(
                 instructionType = Instructions.InstructionType.OP_TYPING,
@@ -91,21 +96,22 @@ class MainActivity : AppCompatActivity() {
 
             if (isKeyboardOn.get() && event.action == ACTION_UP){
                 hideSoftKeyboard()
-                return@setOnTouchListener true
+//                return@setOnTouchListener true
             }
 
-            if (event.action == ACTION_DOWN){
+            if (event.eventTime - lastLandMark > 80){
                 touchX = event.x
                 touchY = event.y
+                lastLandMark = event.eventTime
             }
 
             if (!isKeyboardOn.get()){
 
-                if (event.eventTime - event.downTime >= 600 || event.action == ACTION_MOVE) {
+                if (event.action == ACTION_MOVE || event.eventTime - event.downTime >= 500) {
 
                     val instructions = Instructions(
-                        moveX = event.x.toInt() - touchX.toInt(),
-                        moveY = event.y.toInt() - touchY.toInt(),
+                        moveX = (event.x.toInt() - touchX.toInt()) / 2,
+                        moveY = (event.y.toInt() - touchY.toInt()) / 2,
                         instructionType = Instructions.InstructionType.OP_MOVE,
                         actionType = Instructions.ActionType.fromInt(event.action))
 
@@ -154,17 +160,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun connect(){
-        sock = Socket("192.168.1.83", 80)
+        sock = Socket("192.168.1.83", 5555)
         sock.keepAlive = true
         writeToServer = PrintWriter(OutputStreamWriter(sock.getOutputStream(), StandardCharsets.US_ASCII))
     }
 
     private fun getCharacterDisplayLabel(event: KeyEvent): String{
         return when(event.keyCode){
-            KEYCODE_SPACE -> "SPACE"
-            KEYCODE_SHIFT_LEFT -> "LSHIFT"
-            KEYCODE_DEL -> "DEL"
-            KEYCODE_APOSTROPHE -> "APOS"
+            KEYCODE_SPACE -> "0"
+            KEYCODE_SHIFT_LEFT -> "1"
+            KEYCODE_DEL -> "2"
+            KEYCODE_ENTER -> "3"
+            KEYCODE_EQUALS -> "4"
+            KEYCODE_APOSTROPHE -> "5"
             else -> event.keyCharacterMap.getDisplayLabel(event.keyCode).toString()
         }
     }

@@ -1,10 +1,13 @@
 import java.awt.*;
+import java.awt.event.InputEvent;
 
 public class ControlUtility {
 
     private final Robot r = new Robot();
 
     public ControlUtility() throws AWTException { }
+
+    //TODO - get rid of all the ugly switch cases with something better...
 
     public void processInstructions(Instructions instructions){
         switch (instructions.getOperationKind()){
@@ -13,18 +16,30 @@ public class ControlUtility {
             case OP_MOVE:
             case OP_CLICK_DOWN:
             case OP_CLICK_UP:
-                processMouseEvent(instructions);
+                try {
+                    processMouseEvent(instructions);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
         }
     }
 
-    private void processMouseEvent(Instructions instructions){
+    private void processMouseEvent(Instructions instructions) throws Exception {
         switch (instructions.getActionType()){
             case ACTION_MOVE:
                 int cur_x = MouseInfo.getPointerInfo().getLocation().x;
                 int cur_y = MouseInfo.getPointerInfo().getLocation().y;
                 r.mouseMove(cur_x + instructions.getMoveX(), cur_y + instructions.getMoveY());
                 break;
+            case ACTION_DOWN:
+                r.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                break;
+            case ACTION_UP:
+                r.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                break;
+            default:
+                throw new Exception("Incorrect Action Type"); //TODO - make except more specific?
         }
     }
 
