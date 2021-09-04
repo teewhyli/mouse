@@ -196,12 +196,13 @@ class MainFragment : Fragment() {
          * this fragment using the provided parameters.
          *
          * @param InputMethodManager inputMethodManager.
+         * @param ExecutorService executorService.
          * @return A new instance of fragment MainFragment.
          */
         @JvmStatic fun newInstance(
             inputMethodManager: InputMethodManager,
             executorService: ExecutorService) =
-                MainFragment().apply {
+            MainFragment().apply {
                     imm = inputMethodManager
                     es = executorService
                 }
