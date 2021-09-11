@@ -1,18 +1,14 @@
 package com.example.client
 
+import android.os.Bundle
+import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import android.os.*
-import android.util.Log
-import android.view.inputmethod.InputMethodManager
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), ConnectFragment.ConnectListener {
 
-    private val es: ExecutorService = Executors.newCachedThreadPool()
     private var TAG = "MainActivity"
     private val fragmentManager: FragmentManager = supportFragmentManager
     private lateinit var imm: InputMethodManager
@@ -25,8 +21,8 @@ class MainActivity : AppCompatActivity(), ConnectFragment.ConnectListener {
 
         imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 
-        es.submit{
-            connectFragment = ConnectFragment.newInstance(es)
+        ExecutorServiceFactory.executorService.submit{
+            connectFragment = ConnectFragment.newInstance()
             val fragmentTransaction = fragmentManager.beginTransaction()
             fragmentTransaction.replace(R.id.FragmentContainer, connectFragment)
             fragmentTransaction.addToBackStack(null)
@@ -36,12 +32,12 @@ class MainActivity : AppCompatActivity(), ConnectFragment.ConnectListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        es.shutdownNow()
+        ExecutorServiceFactory.executorService.shutdownNow()
     }
 
-    override fun notify(something: String) {
-        Log.d(TAG, "ConnectFragment notify to switch")
-        mainFragment = MainFragment.newInstance(imm, es)
+    override fun notify(msg: String) {
+        Log.d(TAG, msg)
+        mainFragment = MainFragment.newInstance(imm)
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.setCustomAnimations(
             R.anim.enter_from_right,

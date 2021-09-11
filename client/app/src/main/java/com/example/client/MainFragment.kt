@@ -2,61 +2,37 @@ package com.example.client
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.os.Message
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.util.Log
 import android.view.KeyEvent
 import android.view.KeyEvent.*
+import android.view.LayoutInflater
 import android.view.MotionEvent.ACTION_MOVE
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.core.content.*
+import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.gson.Gson
-import java.io.OutputStreamWriter
-import java.io.PrintWriter
-import java.net.Socket
-import java.nio.charset.StandardCharsets
 import java.util.*
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MainFragment : Fragment() {
     private lateinit var layout: View
     private lateinit var keyboardEditText: EditText
-    private lateinit var mBackgroundHandler: Handler
-    private lateinit var sock: Socket
     private lateinit var imm: InputMethodManager
-    private lateinit var writeToServer: PrintWriter
     private lateinit var extFloatingButton: ExtendedFloatingActionButton
-    private lateinit var es: ExecutorService
     private var touchX: Float = 0.0F
     private var touchY: Float = 0.0F
     private var lastLandMark: Long = 0L
-    private var mBackgroundHandlerThread: HandlerThread = HandlerThread("Message Handler Thread")
     private var isKeyboardOn: AtomicBoolean = AtomicBoolean(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        es.submit{ connect() }
-
-        mBackgroundHandlerThread.start()
-
-        mBackgroundHandler = Handler(mBackgroundHandlerThread.looper){
-            val msg: String = it.obj.toString()
-
-            Log.d("handler", msg)
-
-            writeToServer.println(msg)
-            writeToServer.flush()
-            true
-        }
+        NetworkUtility.connect()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -78,7 +54,7 @@ class MainFragment : Fragment() {
                 return@setOnKeyListener true
             }
 
-            val msg = Message.obtain(mBackgroundHandler)
+            val msg = Message.obtain(NetworkUtility.mBackgroundHandler)
             val instructions = Instructions(
                 instructionType = Instructions.InstructionType.OP_TYPING,
                 actionType = Instructions.ActionType.fromInt(event.action),
@@ -92,7 +68,7 @@ class MainFragment : Fragment() {
         }
 
         layout.setOnTouchListener { _, event ->
-            val msg = Message.obtain(mBackgroundHandler)
+            val msg = Message.obtain(NetworkUtility.mBackgroundHandler)
 
             Log.i("OnTouch", "$event")
 
@@ -152,12 +128,6 @@ class MainFragment : Fragment() {
         return gson.toJson(instructions, instructions::class.java)
     }
 
-    private fun connect() {
-        sock = Socket("192.168.1.83", 5555)
-        sock.keepAlive = true
-        writeToServer = PrintWriter(OutputStreamWriter(sock.getOutputStream(), StandardCharsets.US_ASCII))
-    }
-
     private fun showSoftKeyboard(editText: EditText) {
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
         isKeyboardOn.set(true)
@@ -187,7 +157,7 @@ class MainFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mBackgroundHandlerThread.quitSafely()
+        NetworkUtility.quitHandlerThreadSafely()
     }
 
     companion object {
@@ -196,15 +166,11 @@ class MainFragment : Fragment() {
          * this fragment using the provided parameters.
          *
          * @param InputMethodManager inputMethodManager.
-         * @param ExecutorService executorService.
          * @return A new instance of fragment MainFragment.
          */
-        @JvmStatic fun newInstance(
-            inputMethodManager: InputMethodManager,
-            executorService: ExecutorService) =
+        @JvmStatic fun newInstance(inputMethodManager: InputMethodManager) =
             MainFragment().apply {
                     imm = inputMethodManager
-                    es = executorService
                 }
     }
 }
