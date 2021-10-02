@@ -2,6 +2,7 @@ package com.example.client
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
 import android.os.Message
 import android.util.Log
 import android.view.KeyEvent
@@ -24,6 +25,7 @@ class MainFragment : Fragment() {
     private lateinit var keyboardEditText: EditText
     private lateinit var imm: InputMethodManager
     private lateinit var extFloatingButton: ExtendedFloatingActionButton
+    private lateinit var handler: Handler
     private var touchX: Float = 0.0F
     private var touchY: Float = 0.0F
     private var lastLandMark: Long = 0L
@@ -32,7 +34,9 @@ class MainFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        NetworkUtility.connect()
+        handler = ConnectionFactory()
+            .get(IConnectionFactory.Type.TCP)
+            .connect()!!
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -50,11 +54,12 @@ class MainFragment : Fragment() {
         keyboardEditText.setOnKeyListener { _ , keyCode, event ->
             Log.d("KeyboardEditText", "event: $event")
 
+            val msg = Message.obtain(handler)
+
             if (keyCode == KEYCODE_UNKNOWN){
                 return@setOnKeyListener true
             }
 
-            val msg = Message.obtain(NetworkUtility.mBackgroundHandler)
             val instructions = Instructions(
                 instructionType = Instructions.InstructionType.OP_TYPING,
                 actionType = Instructions.ActionType.fromInt(event.action),
@@ -68,9 +73,9 @@ class MainFragment : Fragment() {
         }
 
         layout.setOnTouchListener { _, event ->
-            val msg = Message.obtain(NetworkUtility.mBackgroundHandler)
 
             Log.i("OnTouch", "$event")
+            val msg = Message.obtain(handler)
 
             if (isKeyboardOn.get() && event.action == ACTION_UP){
                 hideSoftKeyboard()
@@ -117,9 +122,13 @@ class MainFragment : Fragment() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        ConnectionFactory().get(IConnectionFactory.Type.TCP).disconnect()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
@@ -155,16 +164,8 @@ class MainFragment : Fragment() {
         hideSoftKeyboard()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        NetworkUtility.quitHandlerThreadSafely()
-    }
-
     companion object {
         /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
          * @param InputMethodManager inputMethodManager.
          * @return A new instance of fragment MainFragment.
          */

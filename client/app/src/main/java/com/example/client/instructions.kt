@@ -1,6 +1,6 @@
 package com.example.client
 
-class Instructions(
+data class Instructions(
     private val moveX: Int = -1,
     private val moveY: Int = -1,
     private val actionType: ActionType? = null,
@@ -32,6 +32,6 @@ class Instructions(
             InstructionType.OP_TYPING -> "typing"
             else -> "wrong operation"
         }
-        return "InstructionData [instructionType=$commands, actionType=$actionType, moveX=$moveX, moveY=$moveY, input=$input]";
+        return "InstructionData [instructionType=$commands, actionType=$actionType, moveX=$moveX, moveY=$moveY, input=$input]"
     }
 }

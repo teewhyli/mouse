@@ -11,19 +11,16 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import java.util.concurrent.CompletableFuture.supplyAsync
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ConnectFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ConnectFragment : Fragment() {
 
     private lateinit var connectButton: View
     private lateinit var linearProgressIndicator: LinearProgressIndicator
     private val TAG = "ConnectFragment"
     private var listener: ConnectListener? = null
+    private val executorService: ExecutorService = Executors.newCachedThreadPool()
 
     fun interface ConnectListener {
         fun notify(msg: String)
@@ -37,7 +34,7 @@ class ConnectFragment : Fragment() {
 
         connectButton.setOnClickListener {
             linearProgressIndicator.visibility = View.VISIBLE
-            supplyAsync({ Thread.sleep(3000)}, ExecutorServiceFactory.executorService)
+            supplyAsync({ Thread.sleep(3000)}, executorService)
                 .thenApply{
                     listener?.notify("ConnectFragment notify to switch")
                 }
@@ -58,15 +55,11 @@ class ConnectFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_connect, container, false)
     }
 
     companion object {
         /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
          * @return A new instance of fragment ConnectFragment.
          */
         // TODO: Rename and change types and number of parameters

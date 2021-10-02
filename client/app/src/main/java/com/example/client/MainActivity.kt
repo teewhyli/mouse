@@ -21,18 +21,11 @@ class MainActivity : AppCompatActivity(), ConnectFragment.ConnectListener {
 
         imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 
-        ExecutorServiceFactory.executorService.submit{
-            connectFragment = ConnectFragment.newInstance()
-            val fragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.FragmentContainer, connectFragment)
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        ExecutorServiceFactory.executorService.shutdownNow()
+        connectFragment = ConnectFragment.newInstance()
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.FragmentContainer, connectFragment)
+        fragmentTransaction.addToBackStack(null)
+        fragmentTransaction.commit()
     }
 
     override fun notify(msg: String) {
